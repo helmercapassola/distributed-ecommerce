@@ -38,9 +38,9 @@ The platform will provide visibility into:
 A dedicated Business Dashboard will present these
 indicators.
 
-## 3. Technical Architecture
+## 3. Planned Technical Architecture
 
-The platform will include:
+The planned platform architecture includes:
 
 - Apache Kafka with KRaft.
 - Kafka UI for Kafka administration.
@@ -65,7 +65,7 @@ The planned services are:
 | Notification Service | Customer notifications |
 | Audit Service | Event tracking and auditing |
 
-## 5. Technology Stack
+## 5. Planned Technology Stack
 
 | Technology | Purpose |
 |---|---|
@@ -85,6 +85,11 @@ The planned services are:
 
 ```text
 distributed-ecommerce/
+├── common/
+│   └── event-models/
+│       └── src/
+│           ├── main/java/com/ecommerce/events/
+│           └── test/java/com/ecommerce/events/
 ├── docs/
 │   ├── adr/
 │   └── architecture/
@@ -93,10 +98,25 @@ distributed-ecommerce/
 └── scripts/
 ```
 
-The repository structure will evolve as new
-components are implemented.
+The root Maven project aggregates the `common/event-models`
+module. Generated build output under `target/` is not part
+of the source tree.
 
-## 7. Reliability and Distributed Systems
+## 7. Current Implementation
+
+The current codebase provides the initial Java 21 and Maven
+foundation:
+
+- A root Maven parent project centralizes Java, Kafka client,
+  JUnit and build plugin versions.
+- The `common/event-models` module is configured as a JAR.
+- `PlatformInfo.getName()` returns the platform name.
+- A JUnit 5 test verifies the platform name.
+
+Kafka messaging, persistence, services and the infrastructure
+described below are planned; they are not implemented yet.
+
+## 8. Reliability and Distributed Systems
 
 The project will explore:
 
@@ -110,7 +130,7 @@ The project will explore:
 - Eventual consistency.
 - Failure recovery.
 
-## 8. Observability
+## 9. Observability
 
 Prometheus and Grafana will be used to monitor:
 
@@ -120,7 +140,7 @@ Prometheus and Grafana will be used to monitor:
 - Processing latency.
 - Infrastructure performance.
 
-## 9. Project Roadmap
+## 10. Project Roadmap
 
 | Phase | Description |
 |---|---|
@@ -136,25 +156,30 @@ Prometheus and Grafana will be used to monitor:
 | 10 | Performance |
 | 11 | Security and Deployment |
 
-## 10. Project Status
+## 11. Project Status
 
 **Current phase:** Phase 1 - Infrastructure and Kafka Fundamentals.
 
-**Current stage:** Initial repository setup.
+**Current stage:** Maven foundation and the first shared event-models
+module, including its initial unit test.
 
-## 11. Learning Objectives
+## 12. Building and Testing
 
-This project aims to develop practical knowledge of:
+Requirements: JDK 21 and Maven.
 
-- Apache Kafka.
-- Distributed Systems.
-- Event-driven Microservices.
-- Real-time Data Engineering.
-- Stream Processing.
-- Data Integration.
-- Observability.
-- Distributed System Reliability.
+Run all module tests from the repository root:
 
-## 12. License
+```shell
+mvn test
+```
+
+## 13. Learning Objectives
+
+This project aims to develop practical knowledge of Apache Kafka,
+distributed systems, event-driven microservices, real-time data
+engineering, stream processing, data integration, observability
+and distributed system reliability.
+
+## 14. License
 
 ...
