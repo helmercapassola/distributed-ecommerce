@@ -52,7 +52,103 @@ The planned platform architecture includes:
 - Prometheus for metrics collection.
 - Grafana for observability.
 
-## 4. Microservices
+## 4. System Architecture
+
+The diagram below shows the **target architecture**. Only the Maven
+foundation and the initial `event-models` module are implemented today;
+the services and infrastructure in the target design remain planned.
+
+```mermaid
+flowchart TB
+    subgraph FOUNDATION["Implemented foundation"]
+        direction LR
+        MAVEN["Maven parent<br/>Java 21 · dependency management"]
+        MODELS["common/event-models<br/>initial shared module"]
+        TESTS["JUnit 5<br/>module test"]
+        MAVEN --> MODELS --> TESTS
+    end
+
+    subgraph TARGET["Target platform · planned"]
+        direction TB
+
+        subgraph EXPERIENCE["Customer and business experience"]
+            direction LR
+            CLIENT["E-commerce clients"]
+            DASHBOARD["Business dashboard"]
+        end
+
+        subgraph SERVICES["Java 21 services"]
+            direction LR
+            ORDER["Order"]
+            INVENTORY["Inventory"]
+            PAYMENT["Payment"]
+            SHIPPING["Shipping"]
+            NOTIFICATION["Notification"]
+            AUDIT["Audit"]
+        end
+
+        subgraph EVENTING["Event streaming · Apache Kafka with KRaft"]
+            direction LR
+            CONTRACTS["Avro + Schema Registry"]
+            KAFKA[["Kafka topics<br/>orders · inventory · payments · shipping"]]
+        end
+
+        subgraph DATA["Persistence and real-time analytics"]
+            direction LR
+            POSTGRES[("PostgreSQL<br/>service-owned data")]
+            CDC["Kafka Connect<br/>+ Debezium CDC"]
+            STREAMS["Kafka Streams"]
+            ANALYTICS[("Analytics store")]
+        end
+
+        subgraph OPERATIONS["Administration and observability"]
+            direction LR
+            KAFKA_UI["Kafka UI"]
+            PROMETHEUS["Prometheus"]
+            GRAFANA["Grafana"]
+        end
+
+        CLIENT --> ORDER
+        ORDER -->|"publish order events"| KAFKA
+        KAFKA --> INVENTORY
+        KAFKA --> PAYMENT
+        KAFKA --> SHIPPING
+        KAFKA --> NOTIFICATION
+        KAFKA --> AUDIT
+        INVENTORY -->|"stock events"| KAFKA
+        PAYMENT -->|"payment events"| KAFKA
+        SHIPPING -->|"shipping events"| KAFKA
+
+        CONTRACTS -. "govern event schemas" .-> KAFKA
+        ORDER --> POSTGRES
+        INVENTORY --> POSTGRES
+        PAYMENT --> POSTGRES
+        POSTGRES --> CDC --> KAFKA
+        KAFKA --> STREAMS --> ANALYTICS --> DASHBOARD
+
+        KAFKA -.-> KAFKA_UI
+        KAFKA -. "broker and consumer metrics" .-> PROMETHEUS
+        PROMETHEUS --> GRAFANA
+    end
+
+    classDef implemented fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+    classDef planned fill:#eff6ff,stroke:#3b82f6,color:#1e3a8a
+    classDef backbone fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef operations fill:#f3e8ff,stroke:#9333ea,color:#581c87
+
+    class MAVEN,MODELS,TESTS implemented
+    class CLIENT,DASHBOARD,ORDER,INVENTORY,PAYMENT,SHIPPING,NOTIFICATION,AUDIT,CONTRACTS,POSTGRES,CDC,STREAMS,ANALYTICS planned
+    class KAFKA backbone
+    class KAFKA_UI,PROMETHEUS,GRAFANA operations
+```
+
+**Legend:** green = implemented foundation; blue, amber and purple =
+planned platform components. Solid arrows show planned business/data
+flows; dotted arrows show schema governance or operational integration.
+See the [detailed architecture](docs/architecture/system-architecture.md)
+for component responsibilities and design principles.
+
+## 5. Microservices
 
 The planned services are:
 
@@ -65,7 +161,7 @@ The planned services are:
 | Notification Service | Customer notifications |
 | Audit Service | Event tracking and auditing |
 
-## 5. Planned Technology Stack
+## 6. Planned Technology Stack
 
 | Technology | Purpose |
 |---|---|
@@ -81,7 +177,7 @@ The planned services are:
 | Grafana | Observability |
 | Git | Version control |
 
-## 6. Project Structure
+## 7. Project Structure
 
 ```text
 distributed-ecommerce/
@@ -102,7 +198,7 @@ The root Maven project aggregates the `common/event-models`
 module. Generated build output under `target/` is not part
 of the source tree.
 
-## 7. Current Implementation
+## 8. Current Implementation
 
 The current codebase provides the initial Java 21 and Maven
 foundation:
@@ -116,7 +212,7 @@ foundation:
 Kafka messaging, persistence, services and the infrastructure
 described below are planned; they are not implemented yet.
 
-## 8. Reliability and Distributed Systems
+## 9. Reliability and Distributed Systems
 
 The project will explore:
 
@@ -130,7 +226,7 @@ The project will explore:
 - Eventual consistency.
 - Failure recovery.
 
-## 9. Observability
+## 10. Observability
 
 Prometheus and Grafana will be used to monitor:
 
@@ -140,7 +236,7 @@ Prometheus and Grafana will be used to monitor:
 - Processing latency.
 - Infrastructure performance.
 
-## 10. Project Roadmap
+## 11. Project Roadmap
 
 | Phase | Description |
 |---|---|
@@ -156,14 +252,14 @@ Prometheus and Grafana will be used to monitor:
 | 10 | Performance |
 | 11 | Security and Deployment |
 
-## 11. Project Status
+## 12. Project Status
 
 **Current phase:** Phase 1 - Infrastructure and Kafka Fundamentals.
 
 **Current stage:** Maven foundation and the first shared event-models
 module, including its initial unit test.
 
-## 12. Building and Testing
+## 13. Building and Testing
 
 Requirements: JDK 21 and Maven.
 
@@ -173,13 +269,13 @@ Run all module tests from the repository root:
 mvn test
 ```
 
-## 13. Learning Objectives
+## 14. Learning Objectives
 
 This project aims to develop practical knowledge of Apache Kafka,
 distributed systems, event-driven microservices, real-time data
 engineering, stream processing, data integration, observability
 and distributed system reliability.
 
-## 14. License
+## 15. License
 
 ...
