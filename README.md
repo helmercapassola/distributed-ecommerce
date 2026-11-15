@@ -142,9 +142,6 @@ flowchart TB
     class KAFKA_UI,PROMETHEUS,GRAFANA operations
 ```
 
-**Legend:** green = implemented foundation; blue, amber and purple =
-planned platform components. Solid arrows show planned business/data
-flows; dotted arrows show schema governance or operational integration.
 See the [detailed architecture](docs/architecture/system-architecture.md)
 for component responsibilities and design principles.
 
@@ -181,22 +178,29 @@ The planned services are:
 
 ```text
 distributed-ecommerce/
+├── .gitignore
+├── README.md
+├── pom.xml
 ├── common/
 │   └── event-models/
+│       ├── pom.xml
 │       └── src/
 │           ├── main/java/com/ecommerce/events/
+│           │   └── PlatformInfo.java
 │           └── test/java/com/ecommerce/events/
+│               └── PlatformInfoTest.java
 ├── docs/
 │   ├── adr/
+│   │   └── ADR-001-technology-stack.md
 │   └── architecture/
-├── infrastructure/
-│   └── docker/
-└── scripts/
+│       └── system-architecture.md
 ```
 
 The root Maven project aggregates the `common/event-models`
-module. Generated build output under `target/` is not part
-of the source tree.
+module. Generated build output under `target/` and local IDE
+settings are not part of the tracked source tree. The
+`infrastructure/docker` and `scripts` directories remain planned
+and will appear here when they contain versioned files.
 
 ## 8. Current Implementation
 
@@ -208,9 +212,15 @@ foundation:
 - The `common/event-models` module is configured as a JAR.
 - `PlatformInfo.getName()` returns the platform name.
 - A JUnit 5 test verifies the platform name.
+- `docs/adr/ADR-001-technology-stack.md` records the selected
+  technologies and architectural constraints.
+- `docs/architecture/system-architecture.md` documents the
+  target system architecture and its incremental implementation
+  strategy.
 
 Kafka messaging, persistence, services and the infrastructure
-described below are planned; they are not implemented yet.
+described below are documented as goals, but are not implemented
+yet.
 
 ## 9. Reliability and Distributed Systems
 
@@ -256,8 +266,9 @@ Prometheus and Grafana will be used to monitor:
 
 **Current phase:** Phase 1 - Infrastructure and Kafka Fundamentals.
 
-**Current stage:** Maven foundation and the first shared event-models
-module, including its initial unit test.
+**Current stage:** Maven foundation, initial shared event-models
+module and test, plus technology-stack and target-architecture
+documentation.
 
 ## 13. Building and Testing
 
