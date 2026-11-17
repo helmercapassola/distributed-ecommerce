@@ -1,0 +1,39 @@
+﻿{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Tasks for upgrading distributed-ecommerce from Java 21 to Java 25 LTS.",
+  "tasks": [
+    {
+      "type": "upgrade",
+      "id": "001-upgrade-java-runtime-to-25",
+      "description": "Upgrade the project runtime and build target from Java 21 to Java 25 LTS.",
+      "reason": "Java 25 is the latest generally available LTS release as of 2026-11-17; the project currently targets Java 21.",
+      "requirements": "Update the root Maven java.version property to 25 and keep maven.compiler.release and the compiler plugin release aligned with it. Update the Maven project description. Add project-level Maven toolchain enforcement to select JDK 25 without committing machine-specific JDK paths, and document the per-user ~/.m2/toolchains.xml setup and toolchain verification. Update Java runtime references and setup instructions in README.md, docs/adr/ADR-001-technology-stack.md, and docs/architecture/system-architecture.md. Preserve the existing architecture and dependency versions unless a demonstrated Java 25 incompatibility requires a minimal fix. Validate Maven/toolchain selection, effective compiler release 25, a root mvn clean verify, class-file major version 69, and removal of stale active Java 21 requirements.",
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "security",
+      "id": "002-scan-and-remediate-dependency-cves",
+      "description": "Scan project dependencies for known CVEs and remediate any findings.",
+      "reason": "The modernization plan's standard security check verifies the dependency set after the runtime upgrade.",
+      "requirements": "Scan all project dependencies for known CVEs after the Java runtime upgrade. Upgrade vulnerable dependencies to the minimum patched versions; if a fix requires a major version change, document the affected dependency, current and upgraded versions, and breaking-change risk. Confirm the project builds and all tests pass after remediation.",
+      "dependencies": ["001-upgrade-java-runtime-to-25"],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      }
+    }
+  ],
+  "metadata": {
+    "planName": "java-25-runtime-upgrade",
+    "projectName": "distributed-ecommerce",
+    "language": "java",
+    "createdAt": "2026-11-17T14:00:31Z",
+    "version": "1.0"
+  }
+}
+
