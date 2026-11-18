@@ -11,9 +11,10 @@ public record OrderCancelled(UUID eventId, UUID orderId, UUID customerId, String
         Objects.requireNonNull(orderId, "orderId cannot be null");
         Objects.requireNonNull(customerId, "customerId cannot be null");
         Objects.requireNonNull(reason, "reason cannot be null");
-        // Não permitimos motivos vazios ou em branco
+        // Não permitimos motivos vazios ou em branco.
+        // isBlank() verifica se a String está vazia ou contém apenas espaços.
         if (reason.isBlank()) {
-            throw new IllegalArgumentException("reason cannot be empty or blank");
+            throw new IllegalArgumentException("reason cannot be blank");
         }
         Objects.requireNonNull(cancelledAt, "cancelledAt cannot be null");
     }
