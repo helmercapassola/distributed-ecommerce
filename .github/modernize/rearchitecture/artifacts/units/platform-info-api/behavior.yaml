@@ -1,0 +1,7 @@
+unit: platform-info-api
+side_effects: []
+branches: []
+error_paths: []
+concurrency:
+  model: sync
+  tx_boundary: null

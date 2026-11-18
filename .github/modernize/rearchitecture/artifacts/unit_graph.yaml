@@ -1,0 +1,14 @@
+units:
+  - name: platform-info-api
+    trigger: api
+    trigger_detail: "Public Java API call to com.ecommerce.events.PlatformInfo.getName(); not a network endpoint or running service."
+    source_anchors:
+      - path: common/event-models/src/main/java/com/ecommerce/events/PlatformInfo.java
+        line: 9
+    exported_signature:
+      - method: "String PlatformInfo.getName()"
+        source_loc: "common/event-models/src/main/java/com/ecommerce/events/PlatformInfo.java:9"
+        stability: must_preserve
+    dynamic_entrypoints: []
+    depends_on: []
+    shared_refs: []

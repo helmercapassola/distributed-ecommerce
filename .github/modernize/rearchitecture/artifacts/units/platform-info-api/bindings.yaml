@@ -1,0 +1,4 @@
+unit: platform-info-api
+bindings: []
+reason: "A plain Java utility library method has no framework, dependency-injection, route, listener, or other application binding."
+runtime_config: []
