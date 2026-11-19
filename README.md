@@ -1,7 +1,7 @@
 
 # Distributed E-commerce Event Streaming Platform
 
-A distributed, event-driven e-commerce platform built with
+A distributed, event-driven e-commerce platform being built with
 Java 21 and Apache Kafka.
 
 The project explores distributed systems, event-driven
@@ -38,9 +38,14 @@ The platform will provide visibility into:
 A dedicated Business Dashboard will present these
 indicators.
 
-## 3. Planned Technical Architecture
+## 3. Architecture: Implemented and Planned
 
-The planned platform architecture includes:
+The local development foundation is in place: the Maven project,
+initial order event models and tests, and a Docker Compose environment
+for Kafka, PostgreSQL, and Kafka UI. The application services and
+end-to-end event flows are still under development.
+
+The target platform architecture includes:
 
 - Apache Kafka with KRaft.
 - Kafka UI for Kafka administration.
@@ -54,21 +59,23 @@ The planned platform architecture includes:
 
 ## 4. System Architecture
 
-The diagram below shows the **target architecture**. Only the Maven
-foundation and the initial `event-models` module are implemented today;
-the services and infrastructure in the target design remain planned.
+The diagram distinguishes implemented Java code and local infrastructure
+from application services and data-processing components that remain
+planned. Kafka, PostgreSQL, and Kafka UI are configured for local use;
+the application does not yet publish or consume Kafka messages.
 
 ```mermaid
 flowchart TB
-    subgraph FOUNDATION["Implemented foundation"]
+    subgraph FOUNDATION["Implemented application foundation"]
         direction LR
         MAVEN["Maven parent<br/>Java 21 · dependency management"]
-        MODELS["common/event-models<br/>initial shared module"]
-        TESTS["JUnit 5<br/>module test"]
-        MAVEN --> MODELS --> TESTS
+        MODELS["common/event-models<br/>order event records"]
+        TESTS["JUnit 5<br/>model validation tests"]
+        MAVEN --> MODELS
+        MODELS --> TESTS
     end
 
-    subgraph TARGET["Target platform · planned"]
+    subgraph TARGET["Target application architecture"]
         direction TB
 
         subgraph EXPERIENCE["Customer and business experience"]
@@ -90,12 +97,12 @@ flowchart TB
         subgraph EVENTING["Event streaming · Apache Kafka with KRaft"]
             direction LR
             CONTRACTS["Avro + Schema Registry"]
-            KAFKA[["Kafka topics<br/>orders · inventory · payments · shipping"]]
+            KAFKA[["Kafka 4.1.1<br/>local KRaft broker"]]
         end
 
         subgraph DATA["Persistence and real-time analytics"]
             direction LR
-            POSTGRES[("PostgreSQL<br/>service-owned data")]
+            POSTGRES[("PostgreSQL 16<br/>local container")]
             CDC["Kafka Connect<br/>+ Debezium CDC"]
             STREAMS["Kafka Streams"]
             ANALYTICS[("Analytics store")]
@@ -103,7 +110,7 @@ flowchart TB
 
         subgraph OPERATIONS["Administration and observability"]
             direction LR
-            KAFKA_UI["Kafka UI"]
+            KAFKA_UI["Kafka UI<br/>local container"]
             PROMETHEUS["Prometheus"]
             GRAFANA["Grafana"]
         end
@@ -133,13 +140,10 @@ flowchart TB
 
     classDef implemented fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
     classDef planned fill:#eff6ff,stroke:#3b82f6,color:#1e3a8a
-    classDef backbone fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
-    classDef operations fill:#f3e8ff,stroke:#9333ea,color:#581c87
-
+    classDef configured fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
     class MAVEN,MODELS,TESTS implemented
-    class CLIENT,DASHBOARD,ORDER,INVENTORY,PAYMENT,SHIPPING,NOTIFICATION,AUDIT,CONTRACTS,POSTGRES,CDC,STREAMS,ANALYTICS planned
-    class KAFKA backbone
-    class KAFKA_UI,PROMETHEUS,GRAFANA operations
+    class CLIENT,DASHBOARD,ORDER,INVENTORY,PAYMENT,SHIPPING,NOTIFICATION,AUDIT,CONTRACTS,CDC,STREAMS,ANALYTICS,PROMETHEUS,GRAFANA planned
+    class KAFKA,POSTGRES,KAFKA_UI configured
 ```
 
 See the [detailed architecture](docs/architecture/system-architecture.md)
@@ -158,21 +162,21 @@ The planned services are:
 | Notification Service | Customer notifications |
 | Audit Service | Event tracking and auditing |
 
-## 6. Planned Technology Stack
+## 6. Technology Stack
 
-| Technology | Purpose |
-|---|---|
-| Java 21 | Application development |
-| Maven | Build and dependency management |
-| Apache Kafka | Event streaming |
-| Kafka Streams | Stream processing |
-| Avro | Event serialization |
-| PostgreSQL | Data persistence |
-| Docker | Infrastructure |
-| Kafka UI | Kafka administration |
-| Prometheus | Metrics collection |
-| Grafana | Observability |
-| Git | Version control |
+| Technology | Purpose | Status |
+|---|---|---|
+| Java 21 | Application development | Configured in Maven; order event models implemented |
+| Maven | Build and dependency management | Implemented |
+| Apache Kafka 4.1.1 | Event streaming | Configured locally; not yet used by application code |
+| PostgreSQL 16 | Data persistence | Configured locally; application persistence not implemented |
+| Docker Compose | Local infrastructure | Kafka, PostgreSQL, and Kafka UI configured |
+| Kafka UI | Kafka administration | Configured locally |
+| Kafka Streams | Stream processing | Planned |
+| Avro and Schema Registry | Event serialization and schema management | Planned |
+| Kafka Connect and Debezium | Data integration and CDC | Planned |
+| Prometheus and Grafana | Metrics and observability | Planned |
+| Git | Version control | Used for the repository |
 
 ## 7. Project Structure
 
@@ -181,14 +185,51 @@ distributed-ecommerce/
 ├── .gitignore
 ├── README.md
 ├── pom.xml
+├── .github/
+│   └── modernize/
+│       ├── java-25-runtime-upgrade/
+│       │   ├── plan.md
+│       │   └── .metadata/tasks.json
+│       └── rearchitecture/
+│           └── artifacts/
+│               ├── architecture_index.md
+│               ├── project-structure.md
+│               ├── tech-stack.md
+│               ├── unit_graph.yaml
+│               ├── shared_modules.yaml
+│               ├── cross_unit_state.yaml
+│               ├── wire_contracts.yaml
+│               └── units/platform-info-api/
+│                   ├── behavior.yaml
+│                   ├── bindings.yaml
+│                   └── unit_decomposition.yaml
 ├── common/
 │   └── event-models/
 │       ├── pom.xml
 │       └── src/
 │           ├── main/java/com/ecommerce/events/
+│           │   ├── OrderCancelled.java
+│           │   ├── OrderConfirmed.java
+│           │   ├── OrderCreated.java
+│           │   ├── OrderItem.java
 │           │   └── PlatformInfo.java
 │           └── test/java/com/ecommerce/events/
+│               ├── OrderCancelledTest.java
+│               ├── OrderConfirmedTest.java
+│               ├── OrderCreatedTest.java
+│               ├── OrderItemTest.java
 │               └── PlatformInfoTest.java
+├── infrastructure/
+│   └── docker/
+│       └── docker-compose.yml
+├── services/
+│   ├── notification-service/
+│   ├── order-service/
+│   ├── payment-service/
+│   └── product-service/
+├── stream-processing/
+│   └── order-analytics/
+├── scripts/  (empty)
 ├── docs/
 │   ├── adr/
 │   │   └── ADR-001-technology-stack.md
@@ -196,31 +237,42 @@ distributed-ecommerce/
 │       └── system-architecture.md
 ```
 
-The root Maven project aggregates the `common/event-models`
-module. Generated build output under `target/` and local IDE
-settings are not part of the tracked source tree. The
-`infrastructure/docker` and `scripts` directories remain planned
-and will appear here when they contain versioned files.
+The root Maven project currently aggregates only `common/event-models`.
+The service and `stream-processing/order-analytics` directories are
+empty scaffolding and are not Maven modules yet. `scripts/` is empty.
+The `.github/modernize` files contain planning and architecture
+artifacts, not application code. Generated build output under `target/`
+and local IDE settings are not part of the tracked project structure.
 
 ## 8. Current Implementation
 
-The current codebase provides the initial Java 21 and Maven
-foundation:
+The current codebase provides a Java 21 and Maven foundation, initial
+order event models, and local development infrastructure.
 
 - A root Maven parent project centralizes Java, Kafka client,
   JUnit and build plugin versions.
 - The `common/event-models` module is configured as a JAR.
+- `OrderItem` models a product line with a product ID, positive
+  quantity, and non-negative unit price; it calculates the subtotal.
+- `OrderCreated` captures the order, customer, total, currency, and
+  creation time, with constructor validation.
+- `OrderConfirmed` captures an order confirmation and timestamp.
+- `OrderCancelled` captures a cancellation reason and timestamp.
 - `PlatformInfo.getName()` returns the platform name.
-- A JUnit 5 test verifies the platform name.
+- JUnit 5 tests cover event construction, validation rules, the
+  order-item subtotal, and the platform name.
+- Docker Compose defines a local Kafka 4.1.1 KRaft broker, PostgreSQL
+  16, and Kafka UI.
 - `docs/adr/ADR-001-technology-stack.md` records the selected
   technologies and architectural constraints.
 - `docs/architecture/system-architecture.md` documents the
   target system architecture and its incremental implementation
   strategy.
 
-Kafka messaging, persistence, services and the infrastructure
-described below are documented as goals, but are not implemented
-yet.
+Kafka producer/consumer integration, application persistence,
+microservices, schema management, stream processing, analytics,
+and observability are not implemented yet. The PostgreSQL Compose
+configuration is for local development only and is not production-ready.
 
 ## 9. Reliability and Distributed Systems
 
@@ -266,18 +318,42 @@ Prometheus and Grafana will be used to monitor:
 
 **Current phase:** Phase 1 - Infrastructure and Kafka Fundamentals.
 
-**Current stage:** Maven foundation, initial shared event-models
-module and test, plus technology-stack and target-architecture
-documentation.
+**Current stage:** Java 21/Maven foundation; four order-related
+records (`OrderItem`, `OrderCreated`, `OrderConfirmed`, and
+`OrderCancelled`) with JUnit tests; local Docker Compose services for
+Kafka, PostgreSQL, and Kafka UI; and architecture documentation.
 
 ## 13. Building and Testing
 
-Requirements: JDK 21 and Maven.
+Requirements: JDK 21 and Maven to build and test. Docker with the
+Compose plugin is required to run the local infrastructure.
 
-Run all module tests from the repository root:
+Run all Maven module tests from the repository root:
 
 ```shell
 mvn test
+```
+
+Start the local Kafka, PostgreSQL, and Kafka UI containers:
+
+```shell
+docker compose -f infrastructure/docker/docker-compose.yml up -d
+```
+
+Check container status:
+
+```shell
+docker compose -f infrastructure/docker/docker-compose.yml ps
+```
+
+Kafka UI is available at `http://localhost:8080`, Kafka is exposed at
+`localhost:9092`, and PostgreSQL is exposed at `localhost:5433`.
+These services are not yet connected to the Java application.
+
+Stop the local containers without deleting their persisted data:
+
+```shell
+docker compose -f infrastructure/docker/docker-compose.yml down
 ```
 
 ## 14. Learning Objectives
